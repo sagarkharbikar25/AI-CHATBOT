@@ -9,7 +9,7 @@ import { SummaryCard } from './SummaryCard';
 import { AudioPlayer } from './AudioPlayer';
 import { 
   PhoneCall, PhoneOff, Sparkles, Send, Headphones, 
-  Hand, Bot, Activity, Zap, ShieldCheck, ArrowRight, 
+  Hand, Activity, Zap, ShieldCheck, ArrowRight, 
   MessageSquareCode, ChevronRight, CheckCircle2, Play
 } from 'lucide-react';
 
@@ -90,31 +90,28 @@ export const CallView: React.FC<CallViewProps> = ({
           {/* Agent Persona Info */}
           <div className="flex items-center gap-4">
             <div className="relative">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#00F5A0] to-[#00D9F5] p-0.5 glow-mint">
-                <div className="w-full h-full bg-[#080E1C] rounded-[14px] flex items-center justify-center">
-                  <Bot className="w-7 h-7 text-[#00F5A0]" />
-                </div>
-              </div>
+              <img 
+                src="/logo.png" 
+                alt="Alex - FlowDesk Voice" 
+                className="w-14 h-14 rounded-2xl object-cover glow-mint border border-white/15" 
+              />
               <span className="absolute -bottom-1 -right-1 flex h-4 w-4">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00F5A0] opacity-75" />
-                <span className="relative inline-flex rounded-full h-4 w-4 bg-[#00F5A0] border-2 border-[#070A11]" />
+                <span className="relative inline-flex rounded-full h-4 w-4 bg-[#00F5A0] border-2 border-[#05070D]" />
               </span>
             </div>
 
             <div>
               <div className="flex flex-wrap items-center gap-2.5">
-                <h2 className="text-lg font-extrabold font-display text-white tracking-tight">
-                  Alex • Voice Sales Specialist
+                <h2 className="text-lg font-bold font-display text-white tracking-tight">
+                  Alex &middot; FlowDesk Voice Executive
                 </h2>
-                <span className="px-2.5 py-0.5 rounded-full bg-[#00F5A0]/10 border border-[#00F5A0]/30 text-[#00F5A0] font-mono text-[10px] font-bold uppercase tracking-wider">
-                  Neural v2.6
-                </span>
-                <span className="px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10 text-slate-300 font-mono text-[10px]">
-                  {language === 'hi' ? '🇮🇳 हिन्दी Mode' : '🇺🇸 English Mode'}
+                <span className="px-2.5 py-0.5 rounded-full bg-[#00F5A0]/10 border border-[#00F5A0]/30 text-[#00F5A0] text-[11px] font-semibold">
+                  Online &middot; Ready to speak
                 </span>
               </div>
               <p className="text-xs text-slate-400 font-reading mt-0.5">
-                Representing <strong className="text-slate-200">{currentProductObj.name}</strong> — {currentProductObj.tagline}
+                Conversational specialist for <strong className="text-slate-200">{currentProductObj.name}</strong> customer support automation
               </p>
             </div>
           </div>
@@ -171,25 +168,25 @@ export const CallView: React.FC<CallViewProps> = ({
           </div>
         </div>
 
-        {/* Telemetry Status Strip */}
-        <div className="mt-4 pt-3.5 border-t border-white/5 flex flex-wrap items-center justify-between gap-4 text-[11px] font-mono text-slate-400">
+        {/* Features & Trust Bar */}
+        <div className="mt-4 pt-3.5 border-t border-white/5 flex flex-wrap items-center justify-between gap-4 text-xs font-reading text-slate-400">
           <div className="flex items-center gap-5">
-            <span className="flex items-center gap-1.5">
-              <Activity className="w-3.5 h-3.5 text-[#00F5A0]" />
-              <span>Latency: <strong className="text-slate-200">&lt;380ms TTFT</strong></span>
+            <span className="flex items-center gap-1.5 text-slate-300">
+              <Zap className="w-3.5 h-3.5 text-[#00F5A0]" />
+              <span>Real-Time Voice Streaming</span>
             </span>
-            <span className="flex items-center gap-1.5 hidden sm:flex">
-              <Zap className="w-3.5 h-3.5 text-[#00D9F5]" />
-              <span>TTS: <strong className="text-slate-200">Sentence-Chunked</strong></span>
+            <span className="flex items-center gap-1.5 hidden sm:flex text-slate-300">
+              <Activity className="w-3.5 h-3.5 text-[#00D9F5]" />
+              <span>Instant Barge-in Interruption</span>
             </span>
-            <span className="flex items-center gap-1.5 hidden md:flex">
+            <span className="flex items-center gap-1.5 hidden md:flex text-slate-300">
               <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
-              <span>Audio Mix: <strong className="text-slate-200">Synced Dual-Channel</strong></span>
+              <span>Synchronized Dual Recording</span>
             </span>
           </div>
 
-          <span className="text-[10px] text-slate-500 uppercase tracking-widest">
-            Barge-in: Active &middot; Endpointing: Tuned
+          <span className="text-[11px] text-slate-400 font-reading">
+            Automatic Post-Call Sales Intelligence
           </span>
         </div>
       </div>

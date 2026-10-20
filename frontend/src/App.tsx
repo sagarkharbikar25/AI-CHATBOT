@@ -3,7 +3,7 @@ import type { Product } from './types';
 import { fetchProducts } from './lib/api';
 import { CallView } from './components/CallView';
 import { HistoryView } from './components/HistoryView';
-import { Radio, History, PhoneCall, Cpu } from 'lucide-react';
+import { History, PhoneCall, Cpu } from 'lucide-react';
 
 export function App() {
   const [activeTab, setActiveTab] = useState<'call' | 'history'>('call');
@@ -46,11 +46,11 @@ export function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           {/* Logo & Branding */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#00F5A0] to-[#00D9F5] p-0.5 glow-mint">
-              <div className="w-full h-full bg-[#070A11] rounded-[14px] flex items-center justify-center">
-                <Radio className="w-5 h-5 text-[#00F5A0] animate-pulse" />
-              </div>
-            </div>
+            <img 
+              src="/logo.png" 
+              alt="FlowDesk AI Logo" 
+              className="w-10 h-10 rounded-2xl object-cover glow-mint border border-white/15" 
+            />
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-base font-extrabold font-display tracking-tight text-white">
