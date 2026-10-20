@@ -36,3 +36,13 @@ backend/recordings/
 Thumbs.db
 .vscode/
 .idea/
+.gemini/
+.agent/
+.agents/
+.gsd/
+scripts/
+adapters/
+GSD-STYLE.md
+PROJECT_RULES.md
+VERSION
+model_capabilities.yaml

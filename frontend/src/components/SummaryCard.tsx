@@ -1,0 +1,209 @@
+import React from 'react';
+import type { CallAnalysis, SalesStatus } from '../types';
+import { 
+  CheckCircle, Calendar, PhoneForwarded, ThumbsUp, XCircle, 
+  HelpCircle, Quote, ListChecks, ShieldAlert, Sparkles, RefreshCw
+} from 'lucide-react';
+
+interface SummaryCardProps {
+  analysis: CallAnalysis;
+  onReanalyze?: () => void;
+  isReanalyzing?: boolean;
+}
+
+export const getStatusDisplay = (status: SalesStatus | string) => {
+  switch (status) {
+    case 'converted':
+      return {
+        label: 'Converted (Signed Up)',
+        color: 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300 glow-mint',
+        icon: <CheckCircle className="w-4 h-4 text-emerald-400" />,
+        desc: 'Customer explicitly agreed to trial or paid plan activation.',
+      };
+    case 'demo_requested':
+      return {
+        label: 'Demo Requested',
+        color: 'bg-cyan-500/15 border-cyan-500/40 text-cyan-300 glow-cyan',
+        icon: <Calendar className="w-4 h-4 text-cyan-400" />,
+        desc: 'Customer scheduled or requested a dedicated live product demo.',
+      };
+    case 'follow_up_required':
+      return {
+        label: 'Follow-up Required',
+        color: 'bg-amber-500/15 border-amber-500/40 text-amber-300 glow-amber',
+        icon: <PhoneForwarded className="w-4 h-4 text-amber-400" />,
+        desc: 'Stakeholder consultation needed or follow-up requested.',
+      };
+    case 'interested':
+      return {
+        label: 'Interested (Exploratory)',
+        color: 'bg-violet-500/15 border-violet-500/40 text-violet-300',
+        icon: <ThumbsUp className="w-4 h-4 text-violet-400" />,
+        desc: 'Engaged and asked questions with no concrete commitment.',
+      };
+    case 'not_interested':
+      return {
+        label: 'Not Interested',
+        color: 'bg-rose-500/15 border-rose-500/40 text-rose-300 glow-crimson',
+        icon: <XCircle className="w-4 h-4 text-rose-400" />,
+        desc: 'Explicit rejection or content with current software.',
+      };
+    case 'no_response':
+    default:
+      return {
+        label: 'No Response',
+        color: 'bg-slate-700/30 border-slate-600/40 text-slate-400',
+        icon: <HelpCircle className="w-4 h-4 text-slate-400" />,
+        desc: 'Fewer than two customer utterances detected.',
+      };
+  }
+};
+
+export const SummaryCard: React.FC<SummaryCardProps> = ({
+  analysis,
+  onReanalyze,
+  isReanalyzing = false,
+}) => {
+  const statusInfo = getStatusDisplay(analysis.status);
+  const confidencePercent = Math.round((analysis.confidence || 0.8) * 100);
+
+  return (
+    <div className="rounded-3xl glass-panel-elevated p-6 border border-white/10 space-y-6 animate-in fade-in duration-300">
+      {/* Header with Status & Confidence */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-white/5">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-[#00F5A0]" />
+            <span className="text-xs font-mono uppercase tracking-widest text-slate-400 font-semibold">
+              Post-Call Intelligence Dossier
+            </span>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-bold uppercase tracking-wider font-reading ${statusInfo.color}`}>
+              {statusInfo.icon}
+              <span>{statusInfo.label}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <div className="text-right">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400 block">
+              Auditor Confidence
+            </span>
+            <span className="text-lg font-numeric font-bold text-white tracking-tight">
+              {confidencePercent}%
+            </span>
+          </div>
+
+          {onReanalyze && (
+            <button
+              onClick={onReanalyze}
+              disabled={isReanalyzing}
+              title="Re-run post-call analysis"
+              className="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-white/20 text-slate-300 hover:text-white transition-all disabled:opacity-50"
+            >
+              <RefreshCw className={`w-4 h-4 ${isReanalyzing ? 'animate-spin text-[#00F5A0]' : ''}`} />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Summary Narrative */}
+      <div className="space-y-2">
+        <h4 className="text-xs font-mono uppercase tracking-wider text-slate-400 font-semibold">
+          Executive Recap
+        </h4>
+        <p className="text-sm font-reading text-slate-200 leading-relaxed bg-slate-900/40 p-4 rounded-2xl border border-white/5">
+          {analysis.summary}
+        </p>
+      </div>
+
+      {/* Status Evidence Quote */}
+      {analysis.status_evidence && (
+        <div className="p-4 rounded-2xl bg-[#00D9F5]/5 border border-[#00D9F5]/20 space-y-1.5">
+          <div className="flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-wider text-[#00D9F5] font-semibold">
+            <Quote className="w-3.5 h-3.5" /> Verifiable Customer Evidence Quote
+          </div>
+          <p className="text-xs font-reading italic text-slate-200 pl-2 border-l-2 border-[#00D9F5]/50">
+            &ldquo;{analysis.status_evidence}&rdquo;
+          </p>
+          <p className="text-[11px] text-slate-400 font-reading pt-1">
+            <strong>Rationale:</strong> {analysis.status_reason}
+          </p>
+        </div>
+      )}
+
+      {/* Grid: Requirements, Objections, Next Steps */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+        {/* Customer Requirements */}
+        <div className="p-4 rounded-2xl bg-slate-900/40 border border-white/5 space-y-2.5">
+          <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-slate-300 font-semibold">
+            <ListChecks className="w-3.5 h-3.5 text-[#00F5A0]" />
+            Requirements
+          </div>
+          {analysis.customer_requirements.length > 0 ? (
+            <ul className="space-y-1.5 text-xs text-slate-300 font-reading">
+              {analysis.customer_requirements.map((req, i) => (
+                <li key={i} className="flex items-start gap-1.5">
+                  <span className="text-[#00F5A0] mt-0.5">•</span>
+                  <span>{req}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <span className="text-xs text-slate-500 italic font-reading">No specific requirements stated</span>
+          )}
+        </div>
+
+        {/* Objections Handled */}
+        <div className="p-4 rounded-2xl bg-slate-900/40 border border-white/5 space-y-2.5">
+          <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-slate-300 font-semibold">
+            <ShieldAlert className="w-3.5 h-3.5 text-amber-400" />
+            Objections Handled
+          </div>
+          {analysis.objections && analysis.objections.length > 0 ? (
+            <ul className="space-y-2 text-xs text-slate-300 font-reading">
+              {analysis.objections.map((obj, i) => (
+                <li key={i} className="p-2 rounded-lg bg-black/20 border border-white/5 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium text-slate-200">{obj.text}</span>
+                    <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded ${
+                      obj.resolved 
+                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' 
+                        : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                    }`}>
+                      {obj.resolved ? 'Resolved' : 'Pending'}
+                    </span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <span className="text-xs text-slate-500 italic font-reading">No objections recorded</span>
+          )}
+        </div>
+
+        {/* Next Steps */}
+        <div className="p-4 rounded-2xl bg-slate-900/40 border border-white/5 space-y-2.5">
+          <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-slate-300 font-semibold">
+            <Sparkles className="w-3.5 h-3.5 text-[#00D9F5]" />
+            Actionable Next Steps
+          </div>
+          {analysis.next_steps && analysis.next_steps.length > 0 ? (
+            <ul className="space-y-1.5 text-xs text-slate-300 font-reading">
+              {analysis.next_steps.map((step, i) => (
+                <li key={i} className="flex items-start gap-1.5">
+                  <span className="text-[#00D9F5] mt-0.5">→</span>
+                  <span>{step}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <span className="text-xs text-slate-500 italic font-reading">No specific next steps</span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
