@@ -68,7 +68,14 @@ export const CallView: React.FC<CallViewProps> = ({
     setTextInput('');
   };
 
-  const currentProductObj = products.find((p) => p.id === selectedProduct) || products[0];
+  const defaultProduct: Product = {
+    id: 'flowdesk',
+    name: 'FlowDesk',
+    tagline: 'AI-Powered Customer Support Helpdesk',
+    one_liner: 'FlowDesk resolves up to 70% of tickets with AI.',
+    languages: ['en', 'hi'],
+  };
+  const currentProductObj = products.find((p) => p.id === selectedProduct) || products[0] || defaultProduct;
 
   return (
     <div className="space-y-6">

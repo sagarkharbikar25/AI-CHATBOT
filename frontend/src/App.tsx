@@ -7,7 +7,15 @@ import { Radio, History, PhoneCall, Cpu } from 'lucide-react';
 
 export function App() {
   const [activeTab, setActiveTab] = useState<'call' | 'history'>('call');
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>([
+    {
+      id: 'flowdesk',
+      name: 'FlowDesk',
+      tagline: 'AI-Powered Customer Support Helpdesk',
+      one_liner: 'FlowDesk resolves customer support tickets instantly with generative AI.',
+      languages: ['en', 'hi'],
+    },
+  ]);
   const [selectedProduct, setSelectedProduct] = useState<string>('flowdesk');
   const [language, setLanguage] = useState<string>('en');
   const [serverStatus, setServerStatus] = useState<'checking' | 'online' | 'offline'>('checking');
