@@ -40,7 +40,7 @@ export function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#070A11] text-slate-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-[#05070D] cyber-grid text-slate-100 flex flex-col font-sans selection:bg-[#00F5A0] selection:text-slate-950">
       {/* Top Navbar */}
       <header className="sticky top-0 z-40 border-b border-white/10 bg-[#070A11]/80 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">

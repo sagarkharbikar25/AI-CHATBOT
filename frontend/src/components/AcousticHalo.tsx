@@ -23,86 +23,152 @@ export const AcousticHalo: React.FC<AcousticHaloProps> = ({
     let animationFrameId: number;
     let phase = 0;
 
+    // Persistent floating particles
+    const particles = Array.from({ length: 24 }, (_, i) => ({
+      angle: (i / 24) * Math.PI * 2,
+      distance: 0.65 + Math.random() * 0.45,
+      speed: 0.008 + Math.random() * 0.012,
+      size: 1.5 + Math.random() * 2,
+      alpha: 0.3 + Math.random() * 0.7,
+    }));
+
     const render = () => {
       ctx.clearRect(0, 0, size, size);
       const centerX = size / 2;
       const centerY = size / 2;
-      const baseRadius = size * 0.32;
+      const baseRadius = size * 0.28;
 
-      // Color scheme according to state
-      let primaryColor = 'rgba(0, 245, 160, '; // Mint
-      let secondaryColor = 'rgba(0, 217, 245, '; // Cyan
-      let glowColor = 'rgba(0, 245, 160, 0.4)';
+      // Color paletting
+      let primaryHex = '#00F5A0';
+      let r1 = 0, g1 = 245, b1 = 160;
+      let r2 = 0, g2 = 217, b2 = 245;
 
       if (state === 'listening') {
-        primaryColor = 'rgba(0, 217, 245, ';
-        secondaryColor = 'rgba(139, 92, 246, ';
-        glowColor = 'rgba(0, 217, 245, 0.4)';
+        primaryHex = '#00D9F5';
+        r1 = 0; g1 = 217; b1 = 245;
+        r2 = 139; g2 = 92; b2 = 246;
       } else if (state === 'thinking') {
-        primaryColor = 'rgba(255, 176, 32, ';
-        secondaryColor = 'rgba(255, 77, 109, ';
-        glowColor = 'rgba(255, 176, 32, 0.4)';
-      } else if (state === 'idle' || state === 'ended') {
-        primaryColor = 'rgba(148, 163, 184, ';
-        secondaryColor = 'rgba(71, 85, 105, ';
-        glowColor = 'rgba(148, 163, 184, 0.15)';
+        primaryHex = '#FFB020';
+        r1 = 255; g1 = 176; b1 = 32;
+        r2 = 255; g2 = 77; b2 = 109;
+      } else if (state === 'idle') {
+        primaryHex = '#00F5A0';
+        r1 = 0; g1 = 245; b1 = 160;
+        r2 = 0; g2 = 217; b2 = 245;
+      } else if (state === 'ended') {
+        primaryHex = '#94A3B8';
+        r1 = 148; g1 = 163; b1 = 184;
+        r2 = 100; g2 = 116; b2 = 139;
       }
 
-      // Outer radial glow
-      const radialGrad = ctx.createRadialGradient(
-        centerX, centerY, baseRadius * 0.5,
-        centerX, centerY, baseRadius * 1.5 + audioLevel * 35
-      );
-      radialGrad.addColorStop(0, primaryColor + (0.15 + audioLevel * 0.3) + ')');
-      radialGrad.addColorStop(1, 'rgba(7, 10, 17, 0)');
+      const activeAmp = state === 'speaking' || state === 'listening' ? audioLevel : 0.08;
+      const pulseFactor = Math.sin(phase * 0.04) * 0.06;
 
-      ctx.fillStyle = radialGrad;
+      // 1. Huge ambient chromatic bloom backdrop
+      const bgGlow = ctx.createRadialGradient(
+        centerX, centerY, baseRadius * 0.2,
+        centerX, centerY, baseRadius * 2.2 + activeAmp * 40
+      );
+      bgGlow.addColorStop(0, `rgba(${r1}, ${g1}, ${b1}, ${0.25 + activeAmp * 0.35})`);
+      bgGlow.addColorStop(0.5, `rgba(${r2}, ${g2}, ${b2}, ${0.1 + activeAmp * 0.2})`);
+      bgGlow.addColorStop(1, 'rgba(5, 7, 13, 0)');
+
+      ctx.fillStyle = bgGlow;
       ctx.beginPath();
-      ctx.arc(centerX, centerY, baseRadius * 1.6 + audioLevel * 35, 0, Math.PI * 2);
+      ctx.arc(centerX, centerY, baseRadius * 2.3 + activeAmp * 40, 0, Math.PI * 2);
       ctx.fill();
 
-      // Multi-layered organic sine waves
-      const waveCount = state === 'speaking' || state === 'listening' ? 3 : 1;
-      for (let w = 0; w < waveCount; w++) {
+      // 2. Circular Audio Equalizer Spectrum (32 radial spikes)
+      const barCount = 36;
+      for (let i = 0; i < barCount; i++) {
+        const angle = (i / barCount) * Math.PI * 2 + phase * 0.005;
+        const barHarmonic = Math.sin(i * 3 + phase * 0.08);
+        const barHeight = (4 + Math.abs(barHarmonic) * 14 + activeAmp * 32);
+        
+        const rInner = baseRadius * (1.1 + pulseFactor);
+        const rOuter = rInner + barHeight;
+
+        const x1 = centerX + Math.cos(angle) * rInner;
+        const y1 = centerY + Math.sin(angle) * rInner;
+        const x2 = centerX + Math.cos(angle) * rOuter;
+        const y2 = centerY + Math.sin(angle) * rOuter;
+
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.strokeStyle = `rgba(${r2}, ${g2}, ${b2}, ${0.35 + (i % 2 === 0 ? 0.35 : 0.15)})`;
+        ctx.lineWidth = 2.2;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+      }
+
+      // 3. Orbiting neon particles
+      particles.forEach((p) => {
+        p.angle += p.speed;
+        const pRadius = baseRadius * p.distance + Math.sin(p.angle * 4 + phase * 0.05) * 6;
+        const px = centerX + Math.cos(p.angle) * pRadius;
+        const py = centerY + Math.sin(p.angle) * pRadius;
+
+        ctx.beginPath();
+        ctx.arc(px, py, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${r1}, ${g1}, ${b1}, ${p.alpha})`;
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = primaryHex;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      });
+
+      // 4. Multi-layered Harmonic Energy Rings
+      for (let ring = 0; ring < 3; ring++) {
         ctx.beginPath();
         const points = 64;
-        const waveSpeed = (w + 1) * 0.03;
-        const waveAmp = (state === 'speaking' || state === 'listening' ? 12 + audioLevel * 28 : 3) / (w + 1);
+        const ringSpeed = (ring + 1) * 0.025;
+        const ringAmp = (6 + activeAmp * 20) / (ring + 1);
 
-        for (let i = 0; i <= points; i++) {
-          const angle = (i / points) * Math.PI * 2;
-          const harmonic = Math.sin(angle * (5 + w) + phase * waveSpeed) * waveAmp;
-          const r = baseRadius + harmonic + (w * 4);
-          const x = centerX + Math.cos(angle) * r;
-          const y = centerY + Math.sin(angle) * r;
+        for (let j = 0; j <= points; j++) {
+          const theta = (j / points) * Math.PI * 2;
+          const deform = Math.sin(theta * (4 + ring) + phase * ringSpeed) * ringAmp;
+          const rad = baseRadius * (0.92 + ring * 0.12) + deform;
+          const x = centerX + Math.cos(theta) * rad;
+          const y = centerY + Math.sin(theta) * rad;
 
-          if (i === 0) ctx.moveTo(x, y);
+          if (j === 0) ctx.moveTo(x, y);
           else ctx.lineTo(x, y);
         }
 
         ctx.closePath();
-        ctx.strokeStyle = (w % 2 === 0 ? primaryColor : secondaryColor) + (0.7 - w * 0.2) + ')';
-        ctx.lineWidth = 2.5;
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = glowColor;
+        ctx.strokeStyle = ring === 0 ? `rgba(${r1}, ${g1}, ${b1}, 0.85)` : `rgba(${r2}, ${g2}, ${b2}, 0.5)`;
+        ctx.lineWidth = ring === 0 ? 2.5 : 1.5;
+        ctx.shadowBlur = 16;
+        ctx.shadowColor = primaryHex;
         ctx.stroke();
+        ctx.shadowBlur = 0;
       }
 
-      // Center core orb
+      // 5. High-gloss 3D Spherical Core
       const coreGrad = ctx.createRadialGradient(
-        centerX - 8, centerY - 8, 4,
-        centerX, centerY, baseRadius * 0.55
+        centerX - baseRadius * 0.25, centerY - baseRadius * 0.25, 2,
+        centerX, centerY, baseRadius * 0.72
       );
       coreGrad.addColorStop(0, '#FFFFFF');
-      coreGrad.addColorStop(0.3, primaryColor + '0.8)');
-      coreGrad.addColorStop(1, primaryColor + '0.1)');
+      coreGrad.addColorStop(0.2, `rgba(${r1}, ${g1}, ${b1}, 0.95)`);
+      coreGrad.addColorStop(0.65, `rgba(${r2}, ${g2}, ${b2}, 0.6)`);
+      coreGrad.addColorStop(1, 'rgba(10, 16, 30, 0.95)');
 
       ctx.beginPath();
-      ctx.arc(centerX, centerY, baseRadius * (0.45 + audioLevel * 0.15), 0, Math.PI * 2);
+      ctx.arc(centerX, centerY, baseRadius * (0.62 + pulseFactor + activeAmp * 0.15), 0, Math.PI * 2);
       ctx.fillStyle = coreGrad;
-      ctx.shadowBlur = 25;
-      ctx.shadowColor = glowColor;
+      ctx.shadowBlur = 30;
+      ctx.shadowColor = primaryHex;
       ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // Inner refractive ring
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, baseRadius * (0.62 + pulseFactor + activeAmp * 0.15), 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
 
       phase += 1;
       animationFrameId = requestAnimationFrame(render);
@@ -116,12 +182,12 @@ export const AcousticHalo: React.FC<AcousticHaloProps> = ({
   }, [state, audioLevel, size]);
 
   return (
-    <div className="relative flex items-center justify-center">
+    <div className="relative flex items-center justify-center select-none">
       <canvas
         ref={canvasRef}
         width={size}
         height={size}
-        className="transition-transform duration-300"
+        className="transition-transform duration-300 drop-shadow-[0_0_35px_rgba(0,245,160,0.25)]"
       />
     </div>
   );
