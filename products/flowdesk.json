@@ -1,0 +1,87 @@
+{
+  "id": "flowdesk",
+  "name": "FlowDesk",
+  "tagline": "AI-Powered Customer Support Helpdesk for Growing SMBs",
+  "one_liner": "FlowDesk resolves up to 70% of customer support tickets instantly with generative AI, syncing seamlessly with your existing email, chat, and CRM.",
+  "company_overview": "FlowDesk empowers small and medium businesses to deliver 24/7 instant support without expanding support headcount.",
+  "features": [
+    {
+      "name": "Instant AI Resolution",
+      "benefit": "Automatically resolves tier-1 repetitive queries in under 5 seconds using your company knowledge base."
+    },
+    {
+      "name": "Omnichannel Unified Inbox",
+      "benefit": "Manages customer interactions across Email, WhatsApp, Live Chat, and Instagram in a single collaborative interface."
+    },
+    {
+      "name": "Human-in-the-Loop Smart Handoff",
+      "benefit": "Intelligently routes complex tickets to your human team with context summaries, preventing customer frustration."
+    },
+    {
+      "name": "Real-time CSAT & SLA Analytics",
+      "benefit": "Predicts churn risk and flags unresolved bottlenecks before they impact customer satisfaction."
+    }
+  ],
+  "pricing_tiers": [
+    {
+      "tier": "Starter",
+      "price": "$49 / month",
+      "ideal_for": "Early startups & teams under 5 agents",
+      "highlights": "Up to 1,000 AI resolutions/mo, Email & Chat, 3 team seats"
+    },
+    {
+      "tier": "Growth",
+      "price": "$149 / month",
+      "ideal_for": "Scaling SMBs with 5-20 agents (Most Popular)",
+      "highlights": "Up to 5,000 AI resolutions/mo, WhatsApp & CRM integrations, Custom Knowledge AI, Unlimited seats"
+    },
+    {
+      "tier": "Enterprise",
+      "price": "$399 / month",
+      "ideal_for": "High-volume operations",
+      "highlights": "Unlimited AI resolutions, Dedicated Account Manager, 99.9% uptime SLA, Custom LLM fine-tuning"
+    }
+  ],
+  "free_trial": {
+    "duration_days": 14,
+    "requires_credit_card": false,
+    "terms": "Full access to Growth tier features with no commitment."
+  },
+  "integrations": [
+    "Shopify",
+    "HubSpot",
+    "Salesforce",
+    "Slack",
+    "Zendesk",
+    "WordPress"
+  ],
+  "objections": [
+    {
+      "objection": "It is too expensive / we have a tight budget",
+      "response": "I completely understand budget sensitivity. Most FlowDesk users actually save over $800 each month on extra support headcount within the first 30 days. Plus, you can start with our completely free 14-day trial without entering any credit card."
+    },
+    {
+      "objection": "We already use Zendesk / Freshdesk and switching is painful",
+      "response": "You actually don't have to switch! FlowDesk integrates as an AI co-pilot on top of Zendesk or Freshdesk in less than 15 minutes, handling your tickets directly inside your current workspace."
+    },
+    {
+      "objection": "AI will give incorrect answers or hallucinate to our customers",
+      "response": "FlowDesk uses strict knowledge-grounded retrieval. If an answer isn't 100% verified in your documentation, it gracefully hands off to your human team with a draft reply."
+    },
+    {
+      "objection": "We need to speak with our manager / team before deciding",
+      "response": "Totally makes sense! How about I set you up with a quick 15-minute live demo this week for you and your team, or send you our 1-page summary to share with your manager?"
+    }
+  ],
+  "demo_rule": "Offer a personalized 15-minute product walk-through whenever the lead mentions custom workflows, team evaluation, or wants to see live ticket deflection.",
+  "languages": {
+    "en": {
+      "greeting": "Hi there! This is Alex from FlowDesk. Just a quick heads up, this call is recorded for quality assurance and post-call summary. How is your team handling customer support right now?",
+      "permission_ask": "Is it okay if we take 2 minutes to see if FlowDesk is a good fit for you?"
+    },
+    "hi": {
+      "greeting": "नमस्ते! मैं FlowDesk से Alex बोल रहा हूँ। ध्यान दें कि यह कॉल क्वालिटी और समरी के लिए रिकॉर्ड की जा रही है। आपकी टीम अभी कस्टमर सपोर्ट कैसे मैनेज कर रही है?",
+      "permission_ask": "क्या हम यह देखने के लिए दो मिनट बात कर सकते हैं कि FlowDesk आपकी टीम के लिए सही है या नहीं?"
+    }
+  }
+}
