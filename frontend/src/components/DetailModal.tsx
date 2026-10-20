@@ -1,7 +1,8 @@
 import React from 'react';
 import type { CallRecord } from '../types';
 import { X, Calendar, Clock, Bot, User, Trash2 } from 'lucide-react';
-import { SummaryCard, getStatusDisplay } from './SummaryCard';
+import { SummaryCard } from './SummaryCard';
+import { getStatusDisplay } from '../lib/status';
 import { AudioPlayer } from './AudioPlayer';
 
 interface DetailModalProps {

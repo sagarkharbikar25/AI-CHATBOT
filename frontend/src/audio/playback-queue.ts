@@ -80,7 +80,7 @@ export class PlaybackQueue {
       try {
         this.activeSource.stop();
         this.activeSource.disconnect();
-      } catch (e) {
+      } catch {
         // Source may already have ended
       }
       this.activeSource = null;

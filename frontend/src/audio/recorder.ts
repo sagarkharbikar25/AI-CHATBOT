@@ -68,7 +68,7 @@ export class MixedAudioRecorder {
     if (this.micSource) {
       try {
         this.micSource.disconnect();
-      } catch (e) {}
+      } catch {}
     }
   }
 }

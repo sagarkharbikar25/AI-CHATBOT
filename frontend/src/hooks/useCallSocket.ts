@@ -61,7 +61,7 @@ export function useCallSocket({
     if (recognitionRef.current) {
       try {
         recognitionRef.current.stop();
-      } catch (e) {}
+      } catch {}
       recognitionRef.current = null;
     }
 
@@ -247,7 +247,7 @@ export function useCallSocket({
           if (callStateRef.current !== 'ended' && callStateRef.current !== 'idle' && !isFinalizingRef.current) {
             try {
               recognition.start();
-            } catch (e) {}
+            } catch {}
           }
         };
 
@@ -273,7 +273,7 @@ export function useCallSocket({
       try {
         wsRef.current.send(JSON.stringify({ type: 'end', reason }));
         wsRef.current.close();
-      } catch (e) {}
+      } catch {}
     }
 
     const currentCallId = callId;

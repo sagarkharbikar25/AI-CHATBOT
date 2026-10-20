@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { CallRecord } from '../types';
 import { fetchCalls, fetchCallDetail, deleteCall } from '../lib/api';
-import { getStatusDisplay } from './SummaryCard';
+import { getStatusDisplay } from '../lib/status';
 import { DetailModal } from './DetailModal';
 import { History, Play, Trash2, ArrowUpRight, Clock, Calendar, RefreshCw } from 'lucide-react';
 
@@ -11,8 +11,8 @@ export const HistoryView: React.FC = () => {
   const [selectedCall, setSelectedCall] = useState<CallRecord | null>(null);
 
   const loadHistory = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
       const data = await fetchCalls();
       setCalls(data);
     } catch (e) {
@@ -23,7 +23,23 @@ export const HistoryView: React.FC = () => {
   };
 
   useEffect(() => {
-    loadHistory();
+    let ignore = false;
+    fetchCalls()
+      .then((data) => {
+        if (!ignore) {
+          setCalls(data);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        if (!ignore) {
+          console.error('Failed to load call history', err);
+          setLoading(false);
+        }
+      });
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   const handleOpenDetail = async (callId: string) => {
