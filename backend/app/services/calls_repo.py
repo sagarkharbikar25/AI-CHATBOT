@@ -1,10 +1,27 @@
 import json
+import logging
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
+import httpx
+from backend.app.config import settings
 from backend.app.db import get_connection
-from backend.app.schemas import CallDetailResponse, MessageRecord
+
+logger = logging.getLogger(__name__)
 
 class CallsRepository:
+    @staticmethod
+    def _get_supabase_headers() -> Optional[Dict[str, str]]:
+        url = settings.SUPABASE_URL
+        key = settings.SUPABASE_SECRET_KEY or settings.SUPABASE_SERVICE_ROLE_KEY
+        if url and key:
+            return {
+                "apikey": key,
+                "Authorization": f"Bearer {key}",
+                "Content-Type": "application/json",
+                "Prefer": "return=minimal"
+            }
+        return None
+
     @staticmethod
     def create_call(call_id: str, session_id: str, product_id: str, language: str, consent_given: bool) -> Dict[str, Any]:
         now_iso = datetime.now(timezone.utc).isoformat()
@@ -16,6 +33,25 @@ class CallsRepository:
         """, (call_id, session_id, product_id, language, 1 if consent_given else 0, now_iso, now_iso))
         conn.commit()
         conn.close()
+
+        # Optional Supabase async sync
+        headers = CallsRepository._get_supabase_headers()
+        if headers and settings.SUPABASE_URL:
+            try:
+                payload = {
+                    "id": call_id,
+                    "session_id": session_id,
+                    "product_id": product_id,
+                    "language": language,
+                    "call_state": "in_progress",
+                    "consent_given": consent_given,
+                    "consent_at": now_iso,
+                    "started_at": now_iso
+                }
+                httpx.post(f"{settings.SUPABASE_URL.rstrip('/')}/rest/v1/calls", headers=headers, json=payload, timeout=3.0)
+            except Exception as e:
+                logger.debug(f"Supabase call sync note: {e}")
+
         return {
             "id": call_id,
             "session_id": session_id,
@@ -74,6 +110,21 @@ class CallsRepository:
         conn.commit()
         conn.close()
 
+        # Optional Supabase sync
+        headers = CallsRepository._get_supabase_headers()
+        if headers and settings.SUPABASE_URL:
+            try:
+                payload = {
+                    "call_id": call_id,
+                    "seq": seq,
+                    "role": role,
+                    "text": text,
+                    "interrupted": interrupted
+                }
+                httpx.post(f"{settings.SUPABASE_URL.rstrip('/')}/rest/v1/messages", headers=headers, json=payload, timeout=3.0)
+            except Exception as e:
+                logger.debug(f"Supabase message sync note: {e}")
+
     @staticmethod
     def get_messages(call_id: str) -> List[Dict[str, Any]]:
         conn = get_connection()
@@ -108,6 +159,18 @@ class CallsRepository:
         """, (recording_path, recording_mime, call_id))
         conn.commit()
         conn.close()
+
+        headers = CallsRepository._get_supabase_headers()
+        if headers and settings.SUPABASE_URL:
+            try:
+                httpx.patch(
+                    f"{settings.SUPABASE_URL.rstrip('/')}/rest/v1/calls?id=eq.{call_id}",
+                    headers=headers,
+                    json={"recording_path": recording_path, "recording_mime": recording_mime},
+                    timeout=3.0
+                )
+            except Exception as e:
+                logger.debug(f"Supabase update recording note: {e}")
 
     @staticmethod
     def finalize_call(call_id: str, end_reason: str, duration_sec: int, analysis: Dict[str, Any]) -> None:
@@ -146,6 +209,32 @@ class CallsRepository:
         conn.commit()
         conn.close()
 
+        headers = CallsRepository._get_supabase_headers()
+        if headers and settings.SUPABASE_URL:
+            try:
+                payload = {
+                    "call_state": "completed",
+                    "end_reason": end_reason,
+                    "ended_at": now_iso,
+                    "duration_sec": duration_sec,
+                    "summary": analysis.get("summary", ""),
+                    "requirements": analysis.get("customer_requirements", []),
+                    "objections": analysis.get("objections", []),
+                    "next_steps": analysis.get("next_steps", []),
+                    "sales_status": analysis.get("status", "follow_up_required"),
+                    "status_reason": analysis.get("status_reason", ""),
+                    "status_evidence": analysis.get("status_evidence", ""),
+                    "analysis_confidence": analysis.get("confidence", 0.8)
+                }
+                httpx.patch(
+                    f"{settings.SUPABASE_URL.rstrip('/')}/rest/v1/calls?id=eq.{call_id}",
+                    headers=headers,
+                    json=payload,
+                    timeout=3.0
+                )
+            except Exception as e:
+                logger.debug(f"Supabase finalize call note: {e}")
+
     @staticmethod
     def delete_call(call_id: str) -> bool:
         conn = get_connection()
@@ -155,4 +244,13 @@ class CallsRepository:
         affected = cursor.rowcount
         conn.commit()
         conn.close()
+
+        headers = CallsRepository._get_supabase_headers()
+        if headers and settings.SUPABASE_URL:
+            try:
+                httpx.delete(f"{settings.SUPABASE_URL.rstrip('/')}/rest/v1/messages?call_id=eq.{call_id}", headers=headers, timeout=3.0)
+                httpx.delete(f"{settings.SUPABASE_URL.rstrip('/')}/rest/v1/calls?id=eq.{call_id}", headers=headers, timeout=3.0)
+            except Exception as e:
+                logger.debug(f"Supabase delete call note: {e}")
+
         return affected > 0
