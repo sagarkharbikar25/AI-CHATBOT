@@ -262,7 +262,7 @@ export function useCallSocket({
         const recognition = new SpeechRecognition();
         recognition.continuous = true;
         recognition.interimResults = true;
-        recognition.lang = language.startsWith('hi') ? 'hi-IN' : 'en-US';
+        recognition.lang = language.startsWith('hi') ? 'hi-IN' : language.startsWith('te') ? 'te-IN' : 'en-US';
 
         recognition.onresult = (event: any) => {
           // Suppress ALL recognition while bot is speaking — prevents echo-triggered barge-in storm

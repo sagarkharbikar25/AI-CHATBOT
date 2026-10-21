@@ -159,6 +159,16 @@ export const CallView: React.FC<CallViewProps> = ({
               >
                 हिन्दी
               </button>
+              <button
+                onClick={() => onSelectLanguage('te')}
+                disabled={isCallActive}
+                className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${language === 'te'
+                  ? 'bg-[#10B981] text-white shadow-sm'
+                  : 'text-slate-400 hover:text-white'
+                  }`}
+              >
+                తెలుగు
+              </button>
             </div>
 
             <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] text-slate-400 font-mono">

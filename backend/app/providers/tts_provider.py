@@ -7,25 +7,36 @@ from backend.app.providers.base import BaseTTSProvider
 
 logger = logging.getLogger(__name__)
 
-# Male voices only
 VOICE_MAP = {
     "en": "en-US-GuyNeural",      # natural male US English
     "hi": "hi-IN-MadhurNeural",   # male Hindi
+    "te": "te-IN-MohanNeural",    # male Telugu
 }
 
 # Fallback voices if primary fails
 FALLBACK_VOICE_MAP = {
     "en": "en-GB-RyanNeural",
     "hi": "hi-IN-MadhurNeural",
+    "te": "te-IN-MohanNeural",
 }
 
 
 class EdgeTTSProvider(BaseTTSProvider):
     def get_voice(self, language: str) -> str:
-        return VOICE_MAP["hi"] if language.lower().startswith("hi") else VOICE_MAP["en"]
+        lang = language.lower()
+        if lang.startswith("hi"):
+            return VOICE_MAP["hi"]
+        if lang.startswith("te"):
+            return VOICE_MAP["te"]
+        return VOICE_MAP["en"]
 
     def get_fallback_voice(self, language: str) -> str:
-        return FALLBACK_VOICE_MAP["hi"] if language.lower().startswith("hi") else FALLBACK_VOICE_MAP["en"]
+        lang = language.lower()
+        if lang.startswith("hi"):
+            return FALLBACK_VOICE_MAP["hi"]
+        if lang.startswith("te"):
+            return FALLBACK_VOICE_MAP["te"]
+        return FALLBACK_VOICE_MAP["en"]
 
     async def _synthesize_voice(self, text: str, voice: str) -> bytes:
         """Synthesize text with a specific voice, returns complete MP3 bytes."""
