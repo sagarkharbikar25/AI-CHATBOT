@@ -9,7 +9,7 @@ import { SummaryCard } from './SummaryCard';
 import { AudioPlayer } from './AudioPlayer';
 import { API_BASE } from '../lib/api';
 import {
-  PhoneCall, PhoneOff, Sparkles, Send,
+  PhoneCall, PhoneOff, Sparkles, Send, Headphones,
   Hand, Activity, Zap, ShieldCheck, ArrowRight,
   Play, RotateCcw
 } from 'lucide-react';

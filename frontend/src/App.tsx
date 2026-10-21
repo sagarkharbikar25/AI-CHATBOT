@@ -3,7 +3,7 @@ import type { Product } from './types';
 import { fetchProducts, API_BASE } from './lib/api';
 import { CallView } from './components/CallView';
 import { HistoryView } from './components/HistoryView';
-import { History, PhoneCall } from 'lucide-react';
+import { History, PhoneCall, Cpu } from 'lucide-react';
 
 export function App() {
   const [activeTab, setActiveTab] = useState<'call' | 'history'>('call');
