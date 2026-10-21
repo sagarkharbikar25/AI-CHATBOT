@@ -160,8 +160,10 @@ export function useCallSocket({
       setCallId(callData.call_id);
 
       // 6. Connect WebSocket
-      // Connect directly to 127.0.0.1:8000 in dev to isolate from foreign localhost cookies
-      const envWs = (import.meta as any).env?.VITE_WS_URL;
+      const defaultWs = typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')
+        ? 'wss://ai-chatbot-5v0s.onrender.com'
+        : undefined;
+      const envWs = (import.meta as any).env?.VITE_WS_URL || defaultWs;
       let wsUrl: string;
       if (envWs) {
         wsUrl = `${envWs}${callData.ws_url}`;

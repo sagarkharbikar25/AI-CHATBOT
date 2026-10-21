@@ -1,6 +1,10 @@
 import type { Product, CallRecord, CallAnalysis } from '../types';
 
-export const API_BASE = (import.meta as any).env?.VITE_API_URL || '';
+export const API_BASE =
+  (import.meta as any).env?.VITE_API_URL ||
+  (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')
+    ? 'https://ai-chatbot-5v0s.onrender.com'
+    : '');
 
 export function getSessionId(): string {
   let sessionId = localStorage.getItem('flowdesk_voice_session_id');

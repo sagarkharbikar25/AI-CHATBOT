@@ -5,6 +5,14 @@
   "framework": "vite",
   "rewrites": [
     {
+      "source": "/health",
+      "destination": "https://ai-chatbot-5v0s.onrender.com/health"
+    },
+    {
+      "source": "/api/:match*",
+      "destination": "https://ai-chatbot-5v0s.onrender.com/api/:match*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
