@@ -1,6 +1,6 @@
 import React from 'react';
 import type { CallRecord } from '../types';
-import { X, Calendar, Clock, Bot, User, Trash2 } from 'lucide-react';
+import { X, Trash2 } from 'lucide-react';
 import { SummaryCard } from './SummaryCard';
 import { getStatusDisplay } from '../lib/status';
 import { AudioPlayer } from './AudioPlayer';

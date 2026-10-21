@@ -9,10 +9,9 @@ import { SummaryCard } from './SummaryCard';
 import { AudioPlayer } from './AudioPlayer';
 import { API_BASE } from '../lib/api';
 import {
-  PhoneCall, PhoneOff, Sparkles, Send, Headphones,
+  PhoneCall, PhoneOff, Sparkles, Send,
   Hand, Activity, Zap, ShieldCheck, ArrowRight,
-  MessageSquareCode, ChevronRight, CheckCircle2, Play,
-  Users, Languages, Calendar, Terminal, RotateCcw
+  Play, RotateCcw
 } from 'lucide-react';
 
 interface CallViewProps {

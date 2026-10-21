@@ -3,7 +3,7 @@ import type { CallRecord } from '../types';
 import { fetchCalls, fetchCallDetail, deleteCall } from '../lib/api';
 import { getStatusDisplay } from '../lib/status';
 import { DetailModal } from './DetailModal';
-import { History, Play, Trash2, ArrowUpRight, Clock, Calendar, RefreshCw } from 'lucide-react';
+import { History, Trash2, ArrowUpRight, Clock, Calendar, RefreshCw } from 'lucide-react';
 
 export const HistoryView: React.FC = () => {
   const [calls, setCalls] = useState<CallRecord[]>([]);
