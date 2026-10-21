@@ -7,6 +7,7 @@ import os
 import uuid
 from pathlib import Path
 from typing import Dict, Any, List, Optional
+import httpx
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, UploadFile, File, Form, Query, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -58,6 +59,24 @@ def load_products():
             logger.error(f"Failed to load product config {file}: {e}")
 
 load_products()
+
+async def keep_alive_loop():
+    """Pings the public endpoint every 9 minutes to prevent Render free instance from sleeping."""
+    await asyncio.sleep(60)  # Wait 1 minute after initial startup
+    target_url = os.getenv("RENDER_EXTERNAL_URL", "https://ai-chatbot-5v0s.onrender.com").rstrip("/") + "/health"
+    logger.info(f"Keep-alive watchdog initialized for: {target_url}")
+    while True:
+        try:
+            await asyncio.sleep(540)  # 9 minutes (Render sleeps after 15 min)
+            async with httpx.AsyncClient(timeout=15.0) as client:
+                res = await client.get(target_url)
+                logger.info(f"Keep-alive self-ping sent to {target_url} -> status {res.status_code}")
+        except Exception as e:
+            logger.debug(f"Keep-alive self-ping note: {e}")
+
+@app.on_event("startup")
+async def on_startup():
+    asyncio.create_task(keep_alive_loop())
 
 def generate_ws_token(call_id: str) -> str:
     return hmac.new(

@@ -29,6 +29,13 @@ export function App() {
       })
       .catch(() => setServerStatus('offline'));
 
+    // Heartbeat every 4 minutes to keep backend awake and monitor server health
+    const heartbeat = setInterval(() => {
+      fetch(`${API_BASE}/health`)
+        .then((res) => setServerStatus(res.ok ? 'online' : 'offline'))
+        .catch(() => setServerStatus('offline'));
+    }, 4 * 60 * 1000);
+
     fetchProducts()
       .then((data) => {
         if (data.length > 0) {
@@ -37,6 +44,8 @@ export function App() {
         }
       })
       .catch((err) => console.error('Failed to load products', err));
+
+    return () => clearInterval(heartbeat);
   }, []);
 
   return (

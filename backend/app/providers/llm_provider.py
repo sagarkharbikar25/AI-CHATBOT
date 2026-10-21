@@ -21,7 +21,7 @@ class UnifiedLLMProvider(BaseLLMProvider):
             return {
                 "url": "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
                 "key": self.gemini_key,
-                "model": "gemini-1.5-flash"
+                "model": "gemini-flash-lite-latest"
             }
         elif pref == "groq" and self.groq_key:
             return {
@@ -41,7 +41,7 @@ class UnifiedLLMProvider(BaseLLMProvider):
             return {
                 "url": "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
                 "key": self.gemini_key,
-                "model": "gemini-1.5-flash"
+                "model": "gemini-flash-lite-latest"
             }
         elif self.groq_key:
             return {
