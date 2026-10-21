@@ -16,7 +16,34 @@ class UnifiedLLMProvider(BaseLLMProvider):
         self.gemini_key = settings.GEMINI_API_KEY
 
     def _get_active_endpoint(self) -> Optional[Dict[str, str]]:
-        if self.groq_key:
+        pref = (settings.LLM_PROVIDER or "auto").lower()
+        if pref == "gemini" and self.gemini_key:
+            return {
+                "url": "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+                "key": self.gemini_key,
+                "model": "gemini-1.5-flash"
+            }
+        elif pref == "groq" and self.groq_key:
+            return {
+                "url": "https://api.groq.com/openai/v1/chat/completions",
+                "key": self.groq_key,
+                "model": "llama-3.3-70b-versatile"
+            }
+        elif pref == "openai" and self.openai_key:
+            return {
+                "url": "https://api.openai.com/v1/chat/completions",
+                "key": self.openai_key,
+                "model": "gpt-4o-mini"
+            }
+
+        # Auto fallback: Gemini -> Groq -> OpenAI
+        if self.gemini_key:
+            return {
+                "url": "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+                "key": self.gemini_key,
+                "model": "gemini-1.5-flash"
+            }
+        elif self.groq_key:
             return {
                 "url": "https://api.groq.com/openai/v1/chat/completions",
                 "key": self.groq_key,
@@ -27,12 +54,6 @@ class UnifiedLLMProvider(BaseLLMProvider):
                 "url": "https://api.openai.com/v1/chat/completions",
                 "key": self.openai_key,
                 "model": "gpt-4o-mini"
-            }
-        elif self.gemini_key:
-            return {
-                "url": f"https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
-                "key": self.gemini_key,
-                "model": "gemini-1.5-flash"
             }
         return None
 
@@ -57,9 +78,13 @@ class UnifiedLLMProvider(BaseLLMProvider):
             "Content-Type": "application/json"
         }
 
+        url = endpoint["url"]
+        if "generativelanguage.googleapis.com" in url and "?key=" not in url:
+            url = f"{url}?key={endpoint['key']}"
+
         try:
             async with httpx.AsyncClient(timeout=15.0) as client:
-                async with client.stream("POST", endpoint["url"], headers=headers, json=payload) as response:
+                async with client.stream("POST", url, headers=headers, json=payload) as response:
                     if response.status_code != 200:
                         error_text = await response.aread()
                         logger.error(f"LLM API error ({response.status_code}): {error_text.decode('utf-8', errors='ignore')}")
@@ -130,9 +155,13 @@ Respond ONLY with a valid JSON object matching this schema:
             "Content-Type": "application/json"
         }
 
+        url = endpoint["url"]
+        if "generativelanguage.googleapis.com" in url and "?key=" not in url:
+            url = f"{url}?key={endpoint['key']}"
+
         try:
             async with httpx.AsyncClient(timeout=25.0) as client:
-                res = await client.post(endpoint["url"], headers=headers, json=payload)
+                res = await client.post(url, headers=headers, json=payload)
                 if res.status_code == 200:
                     data = res.json()
                     content = data["choices"][0]["message"]["content"]

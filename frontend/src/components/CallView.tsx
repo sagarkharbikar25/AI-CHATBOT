@@ -8,9 +8,9 @@ import { ConsentModal } from './ConsentModal';
 import { SummaryCard } from './SummaryCard';
 import { AudioPlayer } from './AudioPlayer';
 import { API_BASE } from '../lib/api';
-import { 
-  PhoneCall, PhoneOff, Sparkles, Send, Headphones, 
-  Hand, Activity, Zap, ShieldCheck, ArrowRight, 
+import {
+  PhoneCall, PhoneOff, Sparkles, Send, Headphones,
+  Hand, Activity, Zap, ShieldCheck, ArrowRight,
   MessageSquareCode, ChevronRight, CheckCircle2, Play,
   Users, Languages, Calendar, Terminal, RotateCcw
 } from 'lucide-react';
@@ -143,22 +143,20 @@ export const CallView: React.FC<CallViewProps> = ({
               <button
                 onClick={() => onSelectLanguage('en')}
                 disabled={isCallActive}
-                className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
-                  language === 'en'
-                    ? 'bg-[#FF2A55] text-white shadow-sm'
-                    : 'text-slate-400 hover:text-white'
-                }`}
+                className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${language === 'en'
+                  ? 'bg-[#FF2A55] text-white shadow-sm'
+                  : 'text-slate-400 hover:text-white'
+                  }`}
               >
                 EN
               </button>
               <button
                 onClick={() => onSelectLanguage('hi')}
                 disabled={isCallActive}
-                className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
-                  language === 'hi'
-                    ? 'bg-[#A855F7] text-white shadow-sm'
-                    : 'text-slate-400 hover:text-white'
-                }`}
+                className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${language === 'hi'
+                  ? 'bg-[#A855F7] text-white shadow-sm'
+                  : 'text-slate-400 hover:text-white'
+                  }`}
               >
                 हिन्दी
               </button>
@@ -192,10 +190,10 @@ export const CallView: React.FC<CallViewProps> = ({
           <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-white/5 relative z-10">
             <div className="flex items-center gap-2.5">
               <div className="relative">
-                <img 
-                  src="/logo.png" 
-                  alt="Alex Voice Specialist" 
-                  className="w-9 h-9 rounded-lg object-cover bg-black border border-white/10" 
+                <img
+                  src="/logo.png"
+                  alt="Alex Voice Specialist"
+                  className="w-9 h-9 rounded-lg object-cover bg-black border border-white/10"
                 />
                 <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#00E5FF] border-2 border-[#080A10]" />
               </div>
@@ -392,14 +390,14 @@ export const CallView: React.FC<CallViewProps> = ({
                 {callState === 'speaking'
                   ? 'Alex is speaking. Speak at any moment or click Barge-in.'
                   : callState === 'listening'
-                  ? 'Microphone active. Alex is listening to your voice...'
-                  : callState === 'thinking'
-                  ? 'Synthesizing verified knowledge response...'
-                  : callState === 'connecting'
-                  ? 'Establishing secure voice channel...'
-                  : callState === 'ended'
-                  ? 'Call concluded. Post-call analysis complete.'
-                  : 'Initializing session...'}
+                    ? 'Microphone active. Alex is listening to your voice...'
+                    : callState === 'thinking'
+                      ? 'Synthesizing verified knowledge response...'
+                      : callState === 'connecting'
+                        ? 'Establishing secure voice channel...'
+                        : callState === 'ended'
+                          ? 'Call concluded. Post-call analysis complete.'
+                          : 'Initializing session...'}
               </p>
             </div>
 
