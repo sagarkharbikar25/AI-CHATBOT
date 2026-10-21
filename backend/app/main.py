@@ -1,3 +1,4 @@
+import asyncio
 import hmac
 import hashlib
 import json
@@ -247,10 +248,9 @@ async def websocket_call_endpoint(websocket: WebSocket, call_id: str, token: Opt
         language=language
     )
 
-    try:
-        # Start greeting automatically
-        await session.start()
+    start_task = asyncio.create_task(session.start())
 
+    try:
         while True:
             # Handle incoming WS frames
             message = await websocket.receive()
@@ -266,6 +266,9 @@ async def websocket_call_endpoint(websocket: WebSocket, call_id: str, token: Opt
                         )
                     elif msg_type == "barge_in":
                         await session.cancel_active_turn()
+                    elif msg_type == "audio_complete":
+                        # Client finished playing bot audio — now safe to start silence timer
+                        await session.handle_audio_complete()
                     elif msg_type == "end":
                         await session.end_call(reason=payload.get("reason", "user_ended"))
                         break
@@ -281,4 +284,6 @@ async def websocket_call_endpoint(websocket: WebSocket, call_id: str, token: Opt
     except Exception as e:
         logger.error(f"Unexpected error in websocket loop: {e}")
     finally:
+        if not start_task.done():
+            start_task.cancel()
         await session.end_call(reason="disconnected")

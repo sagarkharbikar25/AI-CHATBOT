@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { Product } from './types';
-import { fetchProducts } from './lib/api';
+import { fetchProducts, API_BASE } from './lib/api';
 import { CallView } from './components/CallView';
 import { HistoryView } from './components/HistoryView';
 import { History, PhoneCall, Cpu } from 'lucide-react';
@@ -22,7 +22,7 @@ export function App() {
 
   // Warmup backend and load products
   useEffect(() => {
-    fetch('/health')
+    fetch(`${API_BASE}/health`)
       .then((res) => {
         if (res.ok) setServerStatus('online');
         else setServerStatus('offline');
@@ -40,65 +40,64 @@ export function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#05070D] cyber-grid text-slate-100 flex flex-col font-sans selection:bg-[#00F5A0] selection:text-slate-950">
+    <div className="min-h-screen cyber-tactical-bg text-slate-100 flex flex-col selection:bg-[#FF2A55] selection:text-white">
       {/* Top Navbar */}
-      <header className="sticky top-0 z-40 border-b border-white/10 bg-[#070A11]/80 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 border-b border-white/5 bg-[#06080D]/90 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           {/* Logo & Branding */}
           <div className="flex items-center gap-3">
-            <img 
-              src="/logo.png" 
-              alt="FlowDesk AI Logo" 
-              className="w-10 h-10 rounded-2xl object-cover glow-mint border border-white/15" 
-            />
+            <div className="relative p-0.5 rounded-xl bg-white/10">
+              <img 
+                src="/logo.png" 
+                alt="FlowDesk AI Logo" 
+                className="w-9 h-9 rounded-lg object-cover bg-black" 
+              />
+            </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-base font-extrabold font-display tracking-tight text-white">
-                  FlowDesk<span className="text-[#00F5A0]">.ai</span>
-                </h1>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#00F5A0]/10 border border-[#00F5A0]/30 text-[#00F5A0] font-semibold">
-                  Voice v1.0
+                <span className="text-base font-orbitron font-extrabold tracking-wider text-white">
+                  FLOWDESK<span className="text-[#FF2A55]">.AI</span>
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400 font-reading hidden sm:block">
-                AI Voice Sales Specialist & Real-Time Intelligence Engine
+              <p className="text-[11px] text-slate-400 font-rajdhani font-semibold hidden sm:block tracking-wide">
+                Autonomous Voice Sales Specialist & Support Helpdesk
               </p>
             </div>
           </div>
 
           {/* Navigation Tabs & Health Indicator */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center bg-slate-900/60 p-1 rounded-2xl border border-white/10">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center bg-[#0C101A] p-1 rounded-xl border border-white/10">
               <button
                 onClick={() => setActiveTab('call')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold font-reading transition-all ${
+                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-orbitron font-bold uppercase tracking-wider transition-all cursor-pointer ${
                   activeTab === 'call'
-                    ? 'bg-gradient-to-r from-[#00F5A0]/20 to-[#00D9F5]/20 text-white border border-[#00F5A0]/40 shadow-sm'
+                    ? 'bg-[#FF2A55] text-white shadow-md'
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
-                <PhoneCall className="w-3.5 h-3.5 text-[#00F5A0]" />
+                <PhoneCall className="w-3.5 h-3.5" />
                 Live Terminal
               </button>
               <button
                 onClick={() => setActiveTab('history')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold font-reading transition-all ${
+                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-orbitron font-bold uppercase tracking-wider transition-all cursor-pointer ${
                   activeTab === 'history'
-                    ? 'bg-gradient-to-r from-[#00F5A0]/20 to-[#00D9F5]/20 text-white border border-[#00F5A0]/40 shadow-sm'
+                    ? 'bg-white/15 text-white'
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
-                <History className="w-3.5 h-3.5 text-[#00D9F5]" />
+                <History className="w-3.5 h-3.5" />
                 Call Archives
               </button>
             </div>
 
             {/* Server Status Indicator */}
-            <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900/40 border border-white/5 text-[11px] font-mono">
+            <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-lg bg-white/[0.03] border border-white/5 text-[11px] font-mono">
               <span
-                className={`w-2 h-2 rounded-full ${
+                className={`w-1.5 h-1.5 rounded-full ${
                   serverStatus === 'online'
-                    ? 'bg-[#00F5A0] shadow-[0_0_8px_#00F5A0]'
+                    ? 'bg-[#00E5FF] shadow-[0_0_8px_#00E5FF]'
                     : serverStatus === 'checking'
                     ? 'bg-amber-400 animate-ping'
                     : 'bg-rose-500'
@@ -113,7 +112,7 @@ export function App() {
       </header>
 
       {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {activeTab === 'call' ? (
           <CallView
             products={products}
@@ -128,16 +127,16 @@ export function App() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-white/5 py-4 text-center text-xs text-slate-500 font-reading">
+      <footer className="border-t border-white/5 py-4 text-xs text-slate-500 font-rajdhani">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <Cpu className="w-3.5 h-3.5 text-[#00F5A0]" />
-            <span>Sankar Group AI Voice Sales Bot Assignment • Edge-TTS & Unified LLM</span>
+            <Cpu className="w-3.5 h-3.5 text-[#FF2A55]" />
+            <span>FlowDesk AI • Enterprise Real-Time Voice Intelligence Platform</span>
           </div>
           <div className="flex items-center gap-3 text-[11px] font-mono text-slate-500">
-            <span>Client-side Audio Sync Mix</span>
+            <span>Sub-450ms Voice Cadence</span>
             <span>•</span>
-            <span>Deterministic Status Rubric</span>
+            <span>Deterministic CSAT &amp; Escalation</span>
           </div>
         </div>
       </footer>

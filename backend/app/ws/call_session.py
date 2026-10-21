@@ -66,21 +66,38 @@ class CallSession:
 
     async def start(self):
         """Initializes session and plays spoken greeting."""
-        await self.send_state("connecting")
-        
-        # Load greeting based on language
-        lang_key = "hi" if self.language.lower().startswith("hi") else "en"
-        greeting_text = self.product_config.get("languages", {}).get(lang_key, {}).get(
-            "greeting", 
-            f"Hello! This is Alex from {self.product_config.get('name', 'FlowDesk')}. How can I help your support team today?"
-        )
+        try:
+            lang_key = "hi" if self.language.lower().startswith("hi") else "en"
+            greeting_text = self.product_config.get("languages", {}).get(lang_key, {}).get(
+                "greeting",
+                f"Hello! This is Alex from {self.product_config.get('name', 'FlowDesk')}. How can I help your support team today?"
+            )
 
-        await self.send_state("speaking")
-        await self.send_transcript(role="bot", text=greeting_text, final=True)
-        await self._speak_text(greeting_text)
-        
-        await self.send_state("listening")
-        self._reset_silence_timer()
+            await self.send_state("speaking")
+
+            # Start TTS synthesis immediately in the background while send_transcript
+            # does its Supabase DB write (~300-500ms). The audio arrives faster because
+            # both operations run in parallel instead of sequentially.
+            tts_task = asyncio.create_task(
+                self.tts.synthesize_to_bytes(greeting_text, self.language)
+            )
+
+            await self.send_transcript(role="bot", text=greeting_text, final=True)
+
+            # By now the DB write is done; TTS is either ready or nearly ready
+            audio_bytes = await tts_task
+            if audio_bytes and self.is_active and self.state == "speaking":
+                await self.ws.send_bytes(audio_bytes)
+
+        except asyncio.CancelledError:
+            logger.info("Greeting turn cancelled by barge-in")
+        except Exception as e:
+            logger.error(f"Error during greeting start: {e}")
+        finally:
+            if self.is_active and self.state != "ended":
+                await self.send_state("listening")
+                # Silence timer starts ONLY when client confirms audio playback done.
+
 
     async def handle_user_speech(self, text: str, is_final: bool = True):
         """Called when user speech is detected or transcribed."""
@@ -92,9 +109,12 @@ class CallSession:
         if self.state == "speaking":
             await self.cancel_active_turn()
 
-        # Reset silence counter
+        # Cancel any pending silence watchdog — Alex is about to respond.
+        # Do NOT start a new timer here: the timer only starts in handle_audio_complete()
+        # once the client confirms Alex's audio has finished playing.
+        if self.silence_timer_task and not self.silence_timer_task.done():
+            self.silence_timer_task.cancel()
         self.silence_count = 0
-        self._reset_silence_timer()
 
         if not is_final:
             # Send interim transcript
@@ -139,6 +159,12 @@ class CallSession:
                 interrupted=True
             )
 
+    async def handle_audio_complete(self):
+        """Client confirmed it finished playing audio — safe to start silence watchdog now."""
+        if self.is_active and self.state == "listening":
+            logger.info(f"audio_complete received for call {self.call_id} — starting silence timer")
+            self._reset_silence_timer()
+
     async def _process_bot_turn(self):
         try:
             system_prompt = self._build_system_prompt()
@@ -181,7 +207,7 @@ class CallSession:
             await self.send_transcript(role="bot", text=final_bot_text, final=True, seq=bot_seq)
 
             await self.send_state("listening")
-            self._reset_silence_timer()
+            # Silence timer starts only when client confirms audio done.
 
         except asyncio.CancelledError:
             logger.info("Bot turn cancelled due to barge-in.")

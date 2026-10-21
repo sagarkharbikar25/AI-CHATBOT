@@ -50,17 +50,39 @@ export class MixedAudioRecorder {
   public async stop(): Promise<Blob | null> {
     return new Promise((resolve) => {
       if (!this.mediaRecorder || this.mediaRecorder.state === 'inactive') {
-        resolve(null);
+        const mimeType = this.mediaRecorder?.mimeType || 'audio/webm';
+        resolve(this.recordedChunks.length > 0 ? new Blob(this.recordedChunks, { type: mimeType }) : null);
         return;
       }
 
-      this.mediaRecorder.onstop = () => {
+      let resolved = false;
+      const safeResolve = () => {
+        if (resolved) return;
+        resolved = true;
         const mimeType = this.mediaRecorder?.mimeType || 'audio/webm';
-        const blob = new Blob(this.recordedChunks, { type: mimeType });
+        const blob = this.recordedChunks.length > 0 ? new Blob(this.recordedChunks, { type: mimeType }) : null;
         resolve(blob);
       };
 
-      this.mediaRecorder.stop();
+      // 1.5s timeout safety net in case onstop doesn't fire
+      const timer = setTimeout(safeResolve, 1500);
+
+      this.mediaRecorder.onstop = () => {
+        clearTimeout(timer);
+        safeResolve();
+      };
+
+      try {
+        if (this.mediaRecorder.state === 'recording') {
+          this.mediaRecorder.stop();
+        } else {
+          clearTimeout(timer);
+          safeResolve();
+        }
+      } catch (e) {
+        clearTimeout(timer);
+        safeResolve();
+      }
     });
   }
 

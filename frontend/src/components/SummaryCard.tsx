@@ -20,46 +20,47 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({
   const confidencePercent = Math.round((analysis.confidence || 0.8) * 100);
 
   return (
-    <div className="rounded-3xl glass-panel-elevated p-6 border border-white/10 space-y-6 animate-in fade-in duration-300">
-      {/* Header with Status & Confidence */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-white/5">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-[#00F5A0]" />
-            <span className="text-xs font-mono uppercase tracking-widest text-slate-400 font-semibold">
-              Post-Call Intelligence Dossier
-            </span>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-bold uppercase tracking-wider font-reading ${statusInfo.color}`}>
-              {statusInfo.icon}
-              <span>{statusInfo.label}</span>
+    <div className="mecha-chassis animate-in fade-in duration-300">
+      <div className="mecha-inner p-6 space-y-6">
+        {/* Header with Status & Confidence */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-white/10">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-[#FF2A55]" />
+              <span className="text-xs font-orbitron font-extrabold uppercase tracking-widest text-slate-300">
+                Post-Call Intelligence Dossier
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg border text-xs font-orbitron font-bold uppercase tracking-wider ${statusInfo.color}`}>
+                {statusInfo.icon}
+                <span>{statusInfo.label}</span>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="flex items-center gap-4">
-          <div className="text-right">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400 block">
-              Auditor Confidence
-            </span>
-            <span className="text-lg font-numeric font-bold text-white tracking-tight">
-              {confidencePercent}%
-            </span>
+          <div className="flex items-center gap-4">
+            <div className="text-right">
+              <span className="text-[10px] font-orbitron uppercase tracking-wider text-slate-400 block font-bold">
+                Auditor Confidence
+              </span>
+              <span className="text-xl font-numeric font-extrabold text-white tracking-tight">
+                {confidencePercent}%
+              </span>
+            </div>
+
+            {onReanalyze && (
+              <button
+                onClick={onReanalyze}
+                disabled={isReanalyzing}
+                title="Re-run post-call analysis"
+                className="p-2.5 rounded-lg bg-white/5 border border-white/10 hover:border-white/20 text-slate-300 hover:text-white transition-all disabled:opacity-50"
+              >
+                <RefreshCw className={`w-4 h-4 ${isReanalyzing ? 'animate-spin text-[#FF2A55]' : ''}`} />
+              </button>
+            )}
           </div>
-
-          {onReanalyze && (
-            <button
-              onClick={onReanalyze}
-              disabled={isReanalyzing}
-              title="Re-run post-call analysis"
-              className="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-white/20 text-slate-300 hover:text-white transition-all disabled:opacity-50"
-            >
-              <RefreshCw className={`w-4 h-4 ${isReanalyzing ? 'animate-spin text-[#00F5A0]' : ''}`} />
-            </button>
-          )}
         </div>
-      </div>
 
       {/* Summary Narrative */}
       <div className="space-y-2">
@@ -157,5 +158,6 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 };

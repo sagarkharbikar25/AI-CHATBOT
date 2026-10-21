@@ -11,15 +11,18 @@ logger = logging.getLogger(__name__)
 class CallsRepository:
     @staticmethod
     def _get_supabase_headers() -> Optional[Dict[str, str]]:
-        url = settings.SUPABASE_URL
-        key = settings.SUPABASE_SECRET_KEY or settings.SUPABASE_SERVICE_ROLE_KEY
-        if url and key:
-            return {
-                "apikey": key,
-                "Authorization": f"Bearer {key}",
-                "Content-Type": "application/json",
-                "Prefer": "return=minimal"
-            }
+        try:
+            url = getattr(settings, "SUPABASE_URL", "")
+            key = getattr(settings, "SUPABASE_SECRET_KEY", "") or getattr(settings, "SUPABASE_SERVICE_ROLE_KEY", "")
+            if url and key:
+                return {
+                    "apikey": key,
+                    "Authorization": f"Bearer {key}",
+                    "Content-Type": "application/json",
+                    "Prefer": "return=minimal"
+                }
+        except Exception:
+            pass
         return None
 
     @staticmethod
@@ -76,6 +79,7 @@ class CallsRepository:
         d["requirements"] = json.loads(d["requirements"] or "[]")
         d["objections"] = json.loads(d["objections"] or "[]")
         d["next_steps"] = json.loads(d["next_steps"] or "[]")
+        d["recording_url"] = d.get("recording_path")
         return d
 
     @staticmethod
@@ -94,6 +98,7 @@ class CallsRepository:
             d["requirements"] = json.loads(d["requirements"] or "[]")
             d["objections"] = json.loads(d["objections"] or "[]")
             d["next_steps"] = json.loads(d["next_steps"] or "[]")
+            d["recording_url"] = d.get("recording_path")
             results.append(d)
         return results
 

@@ -4,6 +4,7 @@ import { X, Calendar, Clock, Bot, User, Trash2 } from 'lucide-react';
 import { SummaryCard } from './SummaryCard';
 import { getStatusDisplay } from '../lib/status';
 import { AudioPlayer } from './AudioPlayer';
+import { API_BASE } from '../lib/api';
 
 interface DetailModalProps {
   call: CallRecord | null;
@@ -72,9 +73,11 @@ export const DetailModal: React.FC<DetailModalProps> = ({ call, onClose, onDelet
         {/* Scrollable Body */}
         <div className="flex-1 overflow-y-auto space-y-6 py-4 pr-1">
           {/* Synchronized Audio Player */}
-          {call.recording_url ? (
-            <AudioPlayer src={call.recording_url} title="Session Recording (Synchronized Dual Voice)" />
-          ) : (
+          {(call.recording_url || call.recording_path) ? (() => {
+            const rawSrc = (call.recording_url || call.recording_path || '');
+            const audioSrc = rawSrc.startsWith('http') || !API_BASE ? rawSrc : `${API_BASE}${rawSrc}`;
+            return <AudioPlayer src={audioSrc} title="Session Recording (Synchronized Dual Voice)" />;
+          })() : (
             <div className="p-3 rounded-2xl bg-slate-900/40 border border-white/5 text-xs text-slate-500 font-reading text-center">
               Recording not stored for this session.
             </div>

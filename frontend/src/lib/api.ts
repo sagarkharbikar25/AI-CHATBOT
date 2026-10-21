@@ -1,6 +1,6 @@
 import type { Product, CallRecord, CallAnalysis } from '../types';
 
-const API_BASE = '';
+export const API_BASE = (import.meta as any).env?.VITE_API_URL || '';
 
 export function getSessionId(): string {
   let sessionId = localStorage.getItem('flowdesk_voice_session_id');

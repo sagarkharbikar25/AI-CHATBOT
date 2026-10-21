@@ -20,17 +20,17 @@ export const LiveTranscript: React.FC<LiveTranscriptProps> = ({
   }, [messages, interimMessage]);
 
   return (
-    <div className="flex flex-col h-full rounded-2xl glass-panel p-4 overflow-hidden border border-white/10">
+    <div className="flex flex-col h-full rounded-2xl bg-gradient-to-b from-[#14161C] to-[#0D0E12] p-4 overflow-hidden border border-slate-700/60 shadow-xl">
       {/* Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-white/5 mb-3">
+      <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-3">
         <div className="flex items-center gap-2">
-          <MessageSquare className="w-4 h-4 text-[#00F5A0]" />
-          <h3 className="text-sm font-semibold text-slate-200 tracking-wider uppercase font-reading">
-            Live Intelligence Stream
+          <MessageSquare className="w-4 h-4 text-[#FF2A55]" />
+          <h3 className="text-xs font-orbitron font-extrabold text-white tracking-wider uppercase">
+            Live Telemetry Stream
           </h3>
         </div>
-        <span className="text-[11px] font-mono text-slate-500 uppercase tracking-widest">
-          {messages.length} utterances
+        <span className="text-[10px] font-mono text-[#00D9F5] uppercase tracking-widest px-2 py-0.5 rounded bg-[#00D9F5]/10 border border-[#00D9F5]/30 font-semibold">
+          {messages.length} Utterances
         </span>
       </div>
 
@@ -41,14 +41,14 @@ export const LiveTranscript: React.FC<LiveTranscriptProps> = ({
       >
         {messages.length === 0 && !interimMessage && (
           <div className="h-full flex flex-col items-center justify-center text-center p-6 text-slate-500">
-            <div className="w-12 h-12 rounded-full bg-slate-800/50 flex items-center justify-center mb-3 border border-white/5">
-              <Bot className="w-6 h-6 text-slate-400" />
+            <div className="w-12 h-12 rounded-xl bg-slate-900 border border-white/10 flex items-center justify-center mb-3">
+              <Bot className="w-6 h-6 text-[#FF2A55]" />
             </div>
-            <p className="text-sm font-reading font-medium text-slate-400">
-              Dialogue stream will materialize once connected.
+            <p className="text-xs font-orbitron font-bold uppercase tracking-wider text-slate-300">
+              Dialogue Stream Ready
             </p>
-            <p className="text-xs text-slate-500 mt-1 max-w-xs">
-              Audio is processed in real time with sentence-chunked synthesis and active barge-in.
+            <p className="text-xs font-rajdhani text-slate-400 mt-1 max-w-xs leading-relaxed">
+              Real-time speech synthesis and acoustic barge-in active.
             </p>
           </div>
         )}
@@ -61,16 +61,16 @@ export const LiveTranscript: React.FC<LiveTranscriptProps> = ({
               className={`flex items-start gap-3 ${isBot ? 'justify-start' : 'justify-end'}`}
             >
               {isBot && (
-                <div className="w-7 h-7 rounded-lg bg-[#00F5A0]/10 border border-[#00F5A0]/30 flex items-center justify-center shrink-0 mt-0.5">
-                  <Bot className="w-4 h-4 text-[#00F5A0]" />
+                <div className="w-7 h-7 rounded-lg bg-[#FF2A55]/10 border border-[#FF2A55]/40 flex items-center justify-center shrink-0 mt-0.5">
+                  <Bot className="w-4 h-4 text-[#FF2A55]" />
                 </div>
               )}
 
               <div
-                className={`max-w-[82%] rounded-2xl px-4 py-2.5 text-sm font-reading shadow-lg transition-all duration-200 ${
+                className={`max-w-[82%] rounded-xl px-4 py-2.5 text-sm font-rajdhani shadow-lg transition-all duration-200 ${
                   isBot
-                    ? 'glass-bubble-bot text-slate-100 rounded-tl-sm'
-                    : 'glass-bubble-user text-slate-100 rounded-tr-sm'
+                    ? 'bg-slate-900/90 border border-white/10 text-slate-100'
+                    : 'bg-[#FF2A55]/10 border border-[#FF2A55]/30 text-white'
                 }`}
               >
                 <div className="flex items-center justify-between gap-3 mb-1">

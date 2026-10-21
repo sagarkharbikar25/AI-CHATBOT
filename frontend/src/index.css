@@ -22,9 +22,19 @@
   }
 }
 
-/* Custom Font utilities */
+/* Tactical & Futuristic Typography */
+.font-orbitron {
+  font-family: 'Orbitron', 'Chakra Petch', sans-serif;
+  letter-spacing: 0.06em;
+}
+.font-rajdhani {
+  font-family: 'Rajdhani', sans-serif;
+}
+.font-chakra {
+  font-family: 'Chakra Petch', sans-serif;
+}
 .font-reading {
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Rajdhani', 'Outfit', sans-serif;
 }
 .font-numeric {
   font-family: 'Space Grotesk', sans-serif;
@@ -33,18 +43,63 @@
   font-family: 'JetBrains Mono', monospace;
 }
 .font-display {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Orbitron', 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: 0.04em;
 }
 
-/* Atmospheric Ambient Grid & Aurora */
-.cyber-grid {
+/* High-End Architectural Visual System */
+.editorial-hero-title {
+  font-family: 'Orbitron', -apple-system, sans-serif;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.architect-stage {
+  background: radial-gradient(circle at 50% 0%, rgba(255, 42, 85, 0.07) 0%, rgba(11, 14, 22, 0.95) 70%), #080A10;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.8),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.directive-strip {
+  background: rgba(14, 18, 28, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.directive-strip:hover {
+  background: rgba(22, 28, 44, 0.9);
+  border-color: rgba(255, 42, 85, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -6px rgba(255, 42, 85, 0.25);
+}
+
+.hero-primary-cta {
+  background: linear-gradient(135deg, #FF1744 0%, #FF2A55 100%);
+  color: #FFFFFF;
+  box-shadow: 0 0 35px rgba(255, 42, 85, 0.45);
+  transition: all 0.2s ease;
+}
+
+.hero-primary-cta:hover {
+  background: linear-gradient(135deg, #FF2A55 0%, #FF3D68 100%);
+  box-shadow: 0 0 50px rgba(255, 42, 85, 0.7);
+  transform: translateY(-1px) scale(1.005);
+}
+
+.hero-primary-cta:active {
+  transform: translateY(1px);
+}
+
+/* Tactical Cyber Background */
+.cyber-tactical-bg {
+  background-color: #06080D;
   background-image: 
-    radial-gradient(circle at 50% 0%, rgba(0, 245, 160, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 85% 30%, rgba(0, 217, 245, 0.06) 0%, transparent 40%),
-    radial-gradient(circle at 15% 70%, rgba(139, 92, 246, 0.05) 0%, transparent 45%),
-    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-  background-size: 100% 100%, 100% 100%, 100% 100%, 48px 48px, 48px 48px;
+    radial-gradient(circle at 50% 10%, rgba(255, 42, 85, 0.05) 0%, transparent 50%),
+    linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size: 100% 100%, 48px 48px, 48px 48px;
 }
 
 /* Bespoke Glassmorphism with Gradient Borders */
@@ -156,4 +211,25 @@
 }
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 245, 160, 0.4);
+}
+
+/* 3D Robot Floating Physics */
+@keyframes bot-levitate {
+  0%, 100% {
+    transform: translateY(-6px) rotate(-1deg);
+  }
+  50% {
+    transform: translateY(6px) rotate(1deg);
+  }
+}
+
+@keyframes bot-shadow {
+  0%, 100% {
+    transform: scale(0.85);
+    opacity: 0.4;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.75;
+  }
 }

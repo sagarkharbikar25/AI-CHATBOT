@@ -35,18 +35,33 @@ export function useCallSocket({
   const recognitionRef = useRef<any>(null);
   const timerIntervalRef = useRef<any>(null);
   const callStateRef = useRef<CallState>('idle');
+  const callIdRef = useRef<string | null>(null);
+  const durationSecRef = useRef<number>(0);
+  const endCallRef = useRef<((reason?: string) => Promise<void>) | null>(null);
   const isFinalizingRef = useRef<boolean>(false);
+  // Track bot speaking to suppress echo-triggered barge-in
+  const isBotSpeakingRef = useRef<boolean>(false);
+  // State the backend wants us to be in — applied only after audio drains
+  const pendingStateRef = useRef<CallState | null>(null);
 
-  // Keep ref synced
+  // Keep refs synced
   useEffect(() => {
     callStateRef.current = callState;
   }, [callState]);
+
+  useEffect(() => {
+    callIdRef.current = callId;
+  }, [callId]);
 
   // Timer runner
   useEffect(() => {
     if (callState !== 'idle' && callState !== 'ended') {
       timerIntervalRef.current = setInterval(() => {
-        setDurationSec((prev) => prev + 1);
+        setDurationSec((prev) => {
+          const next = prev + 1;
+          durationSecRef.current = next;
+          return next;
+        });
       }, 1000);
     } else {
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
@@ -114,9 +129,24 @@ export function useCallSocket({
       micStreamRef.current = micStream;
 
       // 3. Setup playback queue
+      // onIdle fires when audio physically stops — apply pending state THEN notify backend
+      const applyPendingState = () => {
+        const pending = pendingStateRef.current;
+        if (pending) {
+          pendingStateRef.current = null;
+          isBotSpeakingRef.current = false;
+          console.log('[useCallSocket] Audio idle → applying pending state:', pending);
+          setCallState(pending);
+        }
+        // Always tell the backend audio is done — this is what starts the silence timer.
+        // Backend will only start its 8s watchdog AFTER receiving this message.
+        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+          wsRef.current.send(JSON.stringify({ type: 'audio_complete' }));
+        }
+      };
       const playbackQueue = new PlaybackQueue(ctx, (level) => {
         setAudioLevel(level);
-      });
+      }, applyPendingState);
       playbackQueueRef.current = playbackQueue;
 
       // 4. Setup synchronized dual-stream audio recorder
@@ -126,17 +156,27 @@ export function useCallSocket({
 
       // 5. Create Call session on backend
       const callData = await createCall(productId, language, true);
+      callIdRef.current = callData.call_id;
       setCallId(callData.call_id);
 
       // 6. Connect WebSocket
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const wsUrl = `${protocol}//${window.location.host}${callData.ws_url}`;
+      // Connect directly to 127.0.0.1:8000 in dev to isolate from foreign localhost cookies
+      const envWs = (import.meta as any).env?.VITE_WS_URL;
+      let wsUrl: string;
+      if (envWs) {
+        wsUrl = `${envWs}${callData.ws_url}`;
+      } else {
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsHost = window.location.port === '5173' ? '127.0.0.1:8000' : window.location.host;
+        wsUrl = `${protocol}//${wsHost}${callData.ws_url}`;
+      }
+      console.log('Connecting voice WebSocket:', wsUrl);
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
       ws.binaryType = 'arraybuffer';
 
       ws.onopen = () => {
-        console.log('WebSocket connected');
+        console.log('WebSocket connection established');
       };
 
       ws.onmessage = async (event) => {
@@ -144,19 +184,43 @@ export function useCallSocket({
           try {
             const data = JSON.parse(event.data);
             if (data.type === 'state') {
-              setCallState(data.value);
+              const prevBotSpeaking = isBotSpeakingRef.current;
+              const newState = data.value as CallState;
+
+              if (newState === 'speaking') {
+                // Bot is about to speak — clear any pending and go live
+                pendingStateRef.current = null;
+                isBotSpeakingRef.current = true;
+                setCallState('speaking');
+              } else if (prevBotSpeaking && playbackQueueRef.current?.isPlaying) {
+                // Bot was speaking and audio is still draining — buffer the state.
+                // onIdle callback will apply it once audio actually stops.
+                console.log('[useCallSocket] Audio still playing, deferring state:', newState);
+                pendingStateRef.current = newState;
+              } else {
+                // No audio in flight — apply immediately
+                isBotSpeakingRef.current = false;
+                if (prevBotSpeaking) playbackQueueRef.current?.flush();
+                setCallState(newState);
+              }
             } else if (data.type === 'transcript') {
               if (data.final) {
-                setMessages((prev) => [
-                  ...prev,
-                  {
-                    seq: data.seq,
-                    role: data.role,
-                    text: data.text,
-                    final: true,
-                    interrupted: data.interrupted,
-                  },
-                ]);
+                setMessages((prev) => {
+                  // Deduplicate if this customer message was already rendered optimistically
+                  if (data.role === 'customer' && prev.some((m) => m.role === 'customer' && m.text.trim() === data.text.trim())) {
+                    return prev;
+                  }
+                  return [
+                    ...prev,
+                    {
+                      seq: data.seq,
+                      role: data.role,
+                      text: data.text,
+                      final: true,
+                      interrupted: data.interrupted,
+                    },
+                  ];
+                });
                 setInterimText(null);
               } else {
                 setInterimText({ role: data.role, text: data.text });
@@ -164,7 +228,8 @@ export function useCallSocket({
             } else if (data.type === 'stop_audio') {
               playbackQueueRef.current?.flush();
             } else if (data.type === 'ended') {
-              endCall(data.reason || 'bot_ended');
+              console.log('[useCallSocket] Backend signaled call ended, reason:', data.reason);
+              endCallRef.current?.(data.reason || 'bot_ended');
             }
           } catch (e) {
             console.error('Error parsing WS message', e);
@@ -183,7 +248,7 @@ export function useCallSocket({
       ws.onclose = () => {
         console.log('WebSocket closed');
         if (callStateRef.current !== 'ended' && !isFinalizingRef.current) {
-          endCall('disconnected');
+          endCallRef.current?.('disconnected');
         }
       };
 
@@ -198,11 +263,14 @@ export function useCallSocket({
         recognition.lang = language.startsWith('hi') ? 'hi-IN' : 'en-US';
 
         recognition.onresult = (event: any) => {
+          // Suppress ALL recognition while bot is speaking — prevents echo-triggered barge-in storm
+          if (isBotSpeakingRef.current) return;
+
           let interim = '';
           for (let i = event.resultIndex; i < event.results.length; i++) {
             const transcript = event.results[i][0].transcript;
             if (event.results[i].isFinal) {
-              // Send final speech
+              // Send final speech only when bot is NOT speaking
               if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
                 wsRef.current.send(
                   JSON.stringify({
@@ -215,13 +283,6 @@ export function useCallSocket({
               setInterimText(null);
             } else {
               interim += transcript;
-              // Barge-in trigger: if bot is speaking and user speaks, flush audio immediately
-              if (callStateRef.current === 'speaking') {
-                playbackQueueRef.current?.flush();
-                if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-                  wsRef.current.send(JSON.stringify({ type: 'barge_in' }));
-                }
-              }
             }
           }
           if (interim) {
@@ -267,6 +328,7 @@ export function useCallSocket({
     isFinalizingRef.current = true;
     setIsFinalizing(true);
     setCallState('ended');
+    setInterimText(null);  // clear any in-progress bubble immediately
 
     // Notify WS if open
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
@@ -276,13 +338,17 @@ export function useCallSocket({
       } catch {}
     }
 
-    const currentCallId = callId;
-    const finalDuration = durationSec;
+    const currentCallId = callIdRef.current || callId;
+    const finalDuration = durationSecRef.current || durationSec;
 
     // Stop recorder and collect final mixed audio
     let audioBlob: Blob | null = null;
     if (recorderRef.current) {
-      audioBlob = await recorderRef.current.stop();
+      try {
+        audioBlob = await recorderRef.current.stop();
+      } catch (recErr) {
+        console.error('[useCallSocket] Error stopping recorder:', recErr);
+      }
     }
 
     cleanupAudio();
@@ -291,37 +357,89 @@ export function useCallSocket({
     if (currentCallId) {
       try {
         if (audioBlob && audioBlob.size > 0) {
+          console.log(`[useCallSocket] Uploading synchronized audio recording (${audioBlob.size} bytes) for call ${currentCallId}...`);
           await uploadRecording(currentCallId, audioBlob);
+          console.log('[useCallSocket] Audio recording upload completed successfully');
+        } else {
+          console.warn('[useCallSocket] Audio recording blob was empty, skipping upload');
         }
+        console.log(`[useCallSocket] Finalizing call ${currentCallId} with backend (reason: ${reason}, duration: ${finalDuration}s)...`);
         const finalizeRes = await finalizeCall(currentCallId, reason, finalDuration);
+        console.log('[useCallSocket] Call finalized successfully:', finalizeRes);
         setAnalysis(finalizeRes.analysis);
         onAnalysisComplete?.(finalizeRes.analysis);
       } catch (e) {
-        console.error('Failed to finalize call', e);
+        console.error('[useCallSocket] Failed to upload recording or finalize call', e);
       } finally {
         setIsFinalizing(false);
       }
     } else {
+      console.warn('[useCallSocket] endCall called with missing callId, cannot finalize');
       setIsFinalizing(false);
     }
   };
 
+  // Keep endCallRef in sync every render
+  endCallRef.current = endCall;
+
+  const resetCall = useCallback(() => {
+    cleanupAudio();
+    isFinalizingRef.current = false;
+    setIsFinalizing(false);
+    callIdRef.current = null;
+    durationSecRef.current = 0;
+    setCallId(null);
+    setCallState('idle');
+    setMessages([]);
+    setInterimText(null);
+    setAudioLevel(0);
+    setDurationSec(0);
+    setAnalysis(null);
+  }, [cleanupAudio]);
+
   const sendManualMessage = (text: string) => {
-    if (!text.trim()) return;
-    if (callStateRef.current === 'speaking') {
-      playbackQueueRef.current?.flush();
-      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-        wsRef.current.send(JSON.stringify({ type: 'barge_in' }));
-      }
+    const trimmed = text.trim();
+    if (!trimmed) return;
+
+    // 1. Optimistically display customer message in Live Transcript
+    setMessages((prev) => [
+      ...prev,
+      {
+        seq: Date.now(),
+        role: 'customer',
+        text: trimmed,
+        final: true,
+      },
+    ]);
+
+    // 2. Always flush bot audio — user is now speaking, regardless of
+    //    what state the ref thinks we're in (timing can lag behind).
+    playbackQueueRef.current?.flush();
+    isBotSpeakingRef.current = false;
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({ type: 'barge_in' }));
     }
+
+    // 3. Dispatch user speech event over WebSocket
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
       wsRef.current.send(
         JSON.stringify({
           type: 'user_speech',
-          text,
+          text: trimmed,
           is_final: true,
         })
       );
+    } else {
+      console.warn('WebSocket not yet in OPEN state to transmit message, readyState:', wsRef.current?.readyState);
+    }
+  };
+
+  // Dedicated barge-in: immediately cuts bot audio and signals backend
+  const bargeIn = () => {
+    playbackQueueRef.current?.flush();
+    isBotSpeakingRef.current = false;
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({ type: 'barge_in' }));
     }
   };
 
@@ -336,6 +454,8 @@ export function useCallSocket({
     analysis,
     startCall,
     endCall,
+    resetCall,
+    bargeIn,
     sendManualMessage,
   };
 }

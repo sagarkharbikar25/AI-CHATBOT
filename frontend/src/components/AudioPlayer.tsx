@@ -69,19 +69,19 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ src, title = 'Call Rec
   };
 
   return (
-    <div className="rounded-2xl glass-panel p-4 border border-white/10 space-y-3">
+    <div className="rounded-xl bg-gradient-to-b from-[#14161C] to-[#0D0E12] p-4 border border-slate-700/60 space-y-3 shadow-xl">
       <audio ref={audioRef} src={src} preload="metadata" />
       
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Volume2 className="w-4 h-4 text-[#00F5A0]" />
-          <span className="text-xs font-semibold text-slate-200 uppercase tracking-wider font-reading">
+          <Volume2 className="w-4 h-4 text-[#FF2A55]" />
+          <span className="text-xs font-orbitron font-extrabold text-white uppercase tracking-wider">
             {title}
           </span>
         </div>
         <button
           onClick={toggleRate}
-          className="px-2 py-0.5 rounded-md bg-white/5 hover:bg-white/10 text-[10px] font-mono text-slate-300 border border-white/5 transition-colors"
+          className="px-2 py-0.5 rounded-md bg-white/5 hover:bg-white/10 text-[10px] font-mono text-slate-300 border border-white/10 transition-colors"
         >
           {playbackRate}x
         </button>
@@ -96,7 +96,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ src, title = 'Call Rec
           step={0.1}
           value={currentTime}
           onChange={handleSeek}
-          className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#00F5A0]"
+          className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#FF2A55]"
         />
         <div className="flex justify-between text-[10px] font-mono text-slate-400">
           <span>{formatTime(currentTime)}</span>
@@ -118,7 +118,8 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ src, title = 'Call Rec
 
         <button
           onClick={togglePlay}
-          className="w-10 h-10 rounded-full bg-gradient-to-r from-[#00F5A0] to-[#00D9F5] text-slate-950 flex items-center justify-center glow-mint hover:scale-105 active:scale-95 transition-transform"
+          className="w-10 h-10 rounded-xl bg-gradient-to-r from-[#FF2A55] to-[#FF003C] hover:from-[#FF476E] hover:to-[#FF1744] text-white flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
+          style={{ boxShadow: '0 0 20px rgba(255, 42, 85, 0.4)' }}
         >
           {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
         </button>

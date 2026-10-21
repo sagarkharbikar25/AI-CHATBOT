@@ -38,27 +38,31 @@ export const AcousticHalo: React.FC<AcousticHaloProps> = ({
       const centerY = size / 2;
       const baseRadius = size * 0.28;
 
-      // Color paletting
-      let primaryHex = '#00F5A0';
-      let r1 = 0, g1 = 245, b1 = 160;
+      // Color paletting for tactical mecha theme
+      let primaryHex = '#FF2A55';
+      let r1 = 255, g1 = 42, b1 = 85;
       let r2 = 0, g2 = 217, b2 = 245;
 
-      if (state === 'listening') {
+      if (state === 'speaking') {
+        primaryHex = '#FF2A55';
+        r1 = 255; g1 = 42; b1 = 85;
+        r2 = 255; g2 = 0; b2 = 60;
+      } else if (state === 'listening') {
         primaryHex = '#00D9F5';
         r1 = 0; g1 = 217; b1 = 245;
-        r2 = 139; g2 = 92; b2 = 246;
+        r2 = 0; g2 = 245; b2 = 160;
       } else if (state === 'thinking') {
         primaryHex = '#FFB020';
         r1 = 255; g1 = 176; b1 = 32;
-        r2 = 255; g2 = 77; b2 = 109;
+        r2 = 255; g2 = 42; b2 = 85;
       } else if (state === 'idle') {
-        primaryHex = '#00F5A0';
-        r1 = 0; g1 = 245; b1 = 160;
+        primaryHex = '#FF2A55';
+        r1 = 255; g1 = 42; b1 = 85;
         r2 = 0; g2 = 217; b2 = 245;
       } else if (state === 'ended') {
-        primaryHex = '#94A3B8';
-        r1 = 148; g1 = 163; b1 = 184;
-        r2 = 100; g2 = 116; b2 = 139;
+        primaryHex = '#64748B';
+        r1 = 100; g1 = 116; b1 = 139;
+        r2 = 71; g2 = 85; b2 = 105;
       }
 
       const activeAmp = state === 'speaking' || state === 'listening' ? audioLevel : 0.08;

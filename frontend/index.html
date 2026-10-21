@@ -9,10 +9,145 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Orbitron:wght@600;700;800;900&family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Rajdhani:wght@500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
   </head>
-  <body class="bg-[#070A11] text-slate-100 antialiased selection:bg-[#00F5A0] selection:text-black">
-    <div id="root"></div>
+  <body class="bg-[#05060A] text-slate-100 antialiased selection:bg-[#FF2A55] selection:text-white">
+    <div id="root">
+      <!-- High-Performance Instant Preloader (Prevents black screen flash on reload) -->
+      <style>
+        .preloader-wrap {
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          background: #05060a radial-gradient(circle at 50% 40%, rgba(255, 42, 85, 0.08) 0%, rgba(0, 229, 255, 0.04) 40%, transparent 70%);
+          color: #f1f5f9;
+          font-family: system-ui, -apple-system, sans-serif;
+          position: relative;
+          overflow: hidden;
+        }
+        .preloader-glow {
+          position: absolute;
+          width: 280px;
+          height: 280px;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(255, 42, 85, 0.15) 0%, transparent 70%);
+          filter: blur(40px);
+          animation: pulseGlow 2.4s ease-in-out infinite alternate;
+        }
+        .preloader-card {
+          position: relative;
+          z-index: 1;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          padding: 32px;
+        }
+        .preloader-logo-ring {
+          width: 80px;
+          height: 80px;
+          border-radius: 24px;
+          padding: 2px;
+          background: linear-gradient(135deg, #ff2a55 0%, #00e5ff 100%);
+          box-shadow: 0 0 30px rgba(255, 42, 85, 0.35);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 24px;
+          animation: logoFloat 3s ease-in-out infinite alternate;
+        }
+        .preloader-logo-inner {
+          width: 100%;
+          height: 100%;
+          background: #090c14;
+          border-radius: 22px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .preloader-logo-inner img {
+          width: 48px;
+          height: 48px;
+          border-radius: 12px;
+          object-fit: cover;
+        }
+        .preloader-brand {
+          font-size: 22px;
+          font-weight: 900;
+          letter-spacing: 0.15em;
+          text-transform: uppercase;
+          margin-bottom: 6px;
+        }
+        .preloader-brand span {
+          color: #ff2a55;
+        }
+        .preloader-subtitle {
+          font-size: 11px;
+          font-family: monospace;
+          letter-spacing: 0.2em;
+          color: #94a3b8;
+          text-transform: uppercase;
+          margin-bottom: 24px;
+        }
+        .preloader-bar-bg {
+          width: 220px;
+          height: 3px;
+          background: rgba(255, 255, 255, 0.08);
+          border-radius: 999px;
+          overflow: hidden;
+          position: relative;
+          margin-bottom: 14px;
+        }
+        .preloader-bar-fill {
+          position: absolute;
+          top: 0;
+          left: 0;
+          height: 100%;
+          width: 45%;
+          background: linear-gradient(90deg, #ff2a55, #00e5ff);
+          border-radius: 999px;
+          animation: barSlide 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+          box-shadow: 0 0 10px #00e5ff;
+        }
+        .preloader-status {
+          font-size: 10px;
+          font-family: monospace;
+          color: #64748b;
+          letter-spacing: 0.12em;
+        }
+        @keyframes pulseGlow {
+          0% { transform: scale(0.9); opacity: 0.6; }
+          100% { transform: scale(1.15); opacity: 1; }
+        }
+        @keyframes logoFloat {
+          0% { transform: translateY(0); }
+          100% { transform: translateY(-6px); }
+        }
+        @keyframes barSlide {
+          0% { left: -45%; width: 30%; }
+          50% { width: 55%; }
+          100% { left: 100%; width: 30%; }
+        }
+      </style>
+      <div class="preloader-wrap">
+        <div class="preloader-glow"></div>
+        <div class="preloader-card">
+          <div class="preloader-logo-ring">
+            <div class="preloader-logo-inner">
+              <img src="/logo.png" alt="FlowDesk" />
+            </div>
+          </div>
+          <div class="preloader-brand">FLOWDESK<span>.AI</span></div>
+          <div class="preloader-subtitle">Autonomous Voice Sales Specialist</div>
+          <div class="preloader-bar-bg">
+            <div class="preloader-bar-fill"></div>
+          </div>
+          <div class="preloader-status">INITIALIZING NEURAL VOICE CORE...</div>
+        </div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
